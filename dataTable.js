@@ -13,13 +13,13 @@ MonsterDataGrid.config = {
     //url地址
     url: null,
     //嵌套字符
-    nestedSymbol:".",
+    nestedSymbol: ".",
     //配置请求
     request: {
         //解析数据长度
-        count:"totalCount",
+        count: "totalCount",
         //解析数据列表
-        data:"data",
+        data: "data",
         //开启分页
         page: true,
         //分页标识
@@ -28,7 +28,7 @@ MonsterDataGrid.config = {
         limitName: 'pageSize'
     },
     //元素
-    element: null,
+    element: "body",
     //是否显示间隔斑马纹
     stripe: true,
     //是否带有纵向边框
@@ -42,13 +42,15 @@ MonsterDataGrid.config = {
     //数据为空时显示的提示内容
     noDataText: null,
     //内容类型头信息
-    contentType:false
+    contentType: false,
+    //默认class前缀
+    className: "monster"
 };
 MonsterDataGrid.foundation = {
     //表格列的配置描述
     cols: {
         //列头显示文字
-        title: null,
+        title: "无",
         //对应列内容的字段名
         key: null,
         //列宽
@@ -68,73 +70,119 @@ MonsterDataGrid.foundation = {
         //对应列的类型。如果设置了 selection 则显示多选框；如果设置了 index 则显示该行的索引（从 1 开始计算）；如果设置了 expand 则显示为一个可展开的按钮
         columnType: null,
         //如果设置了 type=index，可以通过传递 index 属性来自定义索引
-        index: null
+        index: null,
+        //可以排序
+        sort: false
     },
     //请求类型
-    dataType:"json",
+    dataType: "json",
     //成功回执
-    success:"success",
+    success: "success",
     //类型
-    type:{
-        get:"get",
-        post:"post",
-        delete:"delete",
-        put:"put",
+    type: {
+        get: "get",
+        post: "post",
+        delete: "delete",
+        put: "put",
     },
     //构建表格
     table: function (className) {
-        return '<table class="'+className+'-table '+className+'-table-bordered" cellspacing="0">';
+        return '<table class="' + className + '-table ' + className + '-table-bordered" cellspacing="0">';
+    },
+    tableHead: function () {
+        let arr = ["<thead>"];
+        arr.push("<tr>");
+        /*            <th class="sorting">姓名</th>
+                    <th class="sorting">地点</th>
+                    <th class="sorting">办公场所</th>
+                    <th class="sorting">年龄</th>
+                    <th class="sorting">日期</th>
+                    <th class="sorting">金钱</th>
+                    */
+        arr.push("</tr>");
+        arr.push("</thead>");
+    },
+    th: function (name, className) {
+        if (className) {
+            return '<th class="sorting">' + name + '</th>';
+        }
+        return '<th>' + name + '</th>';
     }
 };
 MonsterDataGrid.prototype = {
     Construct: MonsterDataGrid,
     //初始化方法
     init: function (config) {
+        this.columns = [];
         this.config = $.extend(true, {}, MonsterDataGrid.config, config);
-        this.request()
+        this.render();
+        this.request();
     },
     //渲染表格
     render: function () {
+        let table = MonsterDataGrid.foundation.table(this.config.className), head = "";
+        //th
+        this.columnEach((v, k) => {
+            head += MonsterDataGrid.foundation.th(v.title, !!v.sort ? v.sort : false)
+        });
 
     },
     //统一构建
-    framework:(function(){
+    framework: (function () {
         return {
             //ajax请求类型
-            type:function(name){
-                return !!MonsterDataGrid.foundation.type[name]?MonsterDataGrid.foundation.type[name]:MonsterDataGrid.foundation.type.get;
-            },
+            type: function (name) {
+                return !!MonsterDataGrid.foundation.type[name] ? MonsterDataGrid.foundation.type[name] : MonsterDataGrid.foundation.type.get;
+            }
         }
     })(),
     //请求数据
     request: function () {
         if (!this.config.url) {
-            throw new Error("url error...")
+            throw new Error("url error...");
         }
-        let that=this;
-        $.ajax({url:this.config.url, type:this.framework.type(this.config.type), dataType:MonsterDataGrid.foundation.dataType}).
-        then(function(data,result){
-            if(result!==MonsterDataGrid.foundation.success){
-                throw new Error("ajax request failed......")
+        let that = this;
+        $.ajax({
+            url: this.config.url,
+            type: this.framework.type(this.config.type),
+            dataType: MonsterDataGrid.foundation.dataType
+        }).then(function (data, result) {
+            if (result !== MonsterDataGrid.foundation.success) {
+                throw new Error("ajax request failed......");
             }
             that.parseData(data);
         });
     },
     //解析数据
-    parseData(data){
-        this.data= data[this.config.request.data]?data[this.config.request.data]:null;
-        if(!this.data){
+    parseData(data) {
+        this.data = data[this.config.request.data] ? data[this.config.request.data] : null;
+        if (!this.data) {
             throw new Error("parse data error...");
         }
         this.each();
     },
     //查找属性
-    findAttribute:function(data){
-        if(data.constructor !== Object){
-            throw Error("data type not matching object...")
+    findAttribute: function (data) {
+        if (data.constructor !== Object) {
+            throw new Error("data type not matching object...");
         }
-        console.log(data,this.config.columns)
 
+    },
+    //循环字段
+    columnEach: function (func) {
+        let arr = this.columns;
+        if (this.columns.length < 1) {
+            arr = this.config.columns;
+        }
+        //遍历字段
+        arr.forEach((v, k) => {
+            let obj = v;
+            if (this.columns.length!==this.config.columns.length) {
+                obj = $.extend({}, MonsterDataGrid.foundation.cols, v);
+                this.columns.push(obj);
+            }
+            func instanceof Function && func(obj, k)
+        })
     },
     //重载数据
     reload: function () {
@@ -145,8 +193,12 @@ MonsterDataGrid.prototype = {
         if (this.config.columns.length < 1 || !Array.isArray(this.config.columns)) {
             throw new Error("columns error....");
         }
-        for(let i in this.data){
-            this.findAttribute(this.data[i])
+        //遍历字段
+        this.columnEach((v, k) => {
+            console.log(v)
+        });
+        for (let i in this.data) {
+            // this.findAttribute(this.data[i])
         }
     },
     //分页
