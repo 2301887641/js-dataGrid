@@ -120,17 +120,14 @@ MonsterDataGrid.prototype = {
     init: function (config) {
         this.columns = [];
         this.config = $.extend(true, {}, MonsterDataGrid.config, config);
-        // this.render();
         this.request();
     },
     //渲染表格
     render: function (text) {
         let table = MonsterDataGrid.foundation.table(this.config.className), head = "";
-        //th
         this.columnEach((v, k) => {
             head += MonsterDataGrid.foundation.th(v.title, !!v.sort ? v.sort : false)
         });
-
         $(this.config.element).append($(table+MonsterDataGrid.foundation.tableHead(head)+MonsterDataGrid.foundation.tableBody(text)))
     },
     //统一构建
