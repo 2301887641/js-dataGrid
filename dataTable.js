@@ -78,6 +78,10 @@ MonsterDataGrid.foundation = {
     dataType: "json",
     //成功回执
     success: "success",
+    //奇数class
+    odd:"odd",
+    //偶数class
+    even:"even",
     //类型
     type: {
         get: "get",
@@ -89,24 +93,25 @@ MonsterDataGrid.foundation = {
     table: function (className) {
         return '<table class="' + className + '-table ' + className + '-table-bordered" cellspacing="0">';
     },
-    tableHead: function () {
-        let arr = ["<thead>"];
-        arr.push("<tr>");
-        /*            <th class="sorting">姓名</th>
-                    <th class="sorting">地点</th>
-                    <th class="sorting">办公场所</th>
-                    <th class="sorting">年龄</th>
-                    <th class="sorting">日期</th>
-                    <th class="sorting">金钱</th>
-                    */
-        arr.push("</tr>");
-        arr.push("</thead>");
+    //表格头部
+    tableHead: function (th) {
+        return "<thead><tr>" + th + "</tr></thead>";
     },
+    //表格的th
     th: function (name, className) {
-        if (className) {
-            return '<th class="sorting">' + name + '</th>';
-        }
-        return '<th>' + name + '</th>';
+        return !!className ? '<th class="sorting">' + name + '</th>' : '<th>' + name + '</th>';
+    },
+    //表格的tbody
+    tableBody: function (content) {
+        return "<tbody>" + content + "</tbody></table>";
+    },
+    //表格的tr
+    tr: function (order) {
+        return '<tr class="' + order + '">';
+    },
+    //表格的td
+    td: function (title) {
+        return '<td>' + title + '</td>'
     }
 };
 MonsterDataGrid.prototype = {
@@ -115,17 +120,18 @@ MonsterDataGrid.prototype = {
     init: function (config) {
         this.columns = [];
         this.config = $.extend(true, {}, MonsterDataGrid.config, config);
-        this.render();
+        // this.render();
         this.request();
     },
     //渲染表格
-    render: function () {
+    render: function (text) {
         let table = MonsterDataGrid.foundation.table(this.config.className), head = "";
         //th
         this.columnEach((v, k) => {
             head += MonsterDataGrid.foundation.th(v.title, !!v.sort ? v.sort : false)
         });
 
+        $(this.config.element).append($(table+MonsterDataGrid.foundation.tableHead(head)+MonsterDataGrid.foundation.tableBody(text)))
     },
     //统一构建
     framework: (function () {
@@ -161,26 +167,13 @@ MonsterDataGrid.prototype = {
         }
         this.each();
     },
-    //查找属性
-    findAttribute: function (data) {
-        if (data.constructor !== Object) {
-            throw new Error("data type not matching object...");
-        }
-
-    },
     //循环字段
     columnEach: function (func) {
-        let arr = this.columns;
-        if (this.columns.length < 1) {
-            arr = this.config.columns;
-        }
+        let arr = (this.columns.length < 1) ? this.config.columns : this.columns;
         //遍历字段
         arr.forEach((v, k) => {
-            let obj = v;
-            if (this.columns.length!==this.config.columns.length) {
-                obj = $.extend({}, MonsterDataGrid.foundation.cols, v);
-                this.columns.push(obj);
-            }
+            let obj = (this.columns.length !== this.config.columns.length) ? $.extend({}, MonsterDataGrid.foundation.cols, v) : v;
+            this.columns.push(obj);
             func instanceof Function && func(obj, k)
         })
     },
@@ -193,13 +186,20 @@ MonsterDataGrid.prototype = {
         if (this.config.columns.length < 1 || !Array.isArray(this.config.columns)) {
             throw new Error("columns error....");
         }
-        //遍历字段
-        this.columnEach((v, k) => {
-            console.log(v)
-        });
-        for (let i in this.data) {
-            // this.findAttribute(this.data[i])
+        if (!Array.isArray(this.data)) {
+            throw new Error("data type not matching object...");
         }
+        let str = "",num=0;
+        for (let i in this.data) {
+            str +=(num%2!==0)?MonsterDataGrid.foundation.tr(MonsterDataGrid.foundation.odd):MonsterDataGrid.foundation.tr(MonsterDataGrid.foundation.even);
+            this.columnEach((v, k) => {
+                str+=MonsterDataGrid.foundation.td(this.data[i][v.key])
+                // console.log(this.data[i][v.key])
+            });
+            num++;
+        }
+        str+=(str.length>0)?"</tr>":"";
+        this.render(str);
     },
     //分页
     pagination: function () {
