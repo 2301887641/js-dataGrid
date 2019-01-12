@@ -8,12 +8,14 @@ MonsterDataGrid.config = {
     id: null,
     //表格列数组
     columns: [],
+    //ajax类型
+    type: "get",
+    //url地址
+    url: null,
+    //嵌套字符
+    nestedSymbol:".",
     //配置请求
     request: {
-        //ajax类型
-        ajaxType: "get",
-        //url地址
-        url: null,
         //解析数据长度
         count:"totalCount",
         //解析数据列表
@@ -68,8 +70,18 @@ MonsterDataGrid.foundation = {
         //如果设置了 type=index，可以通过传递 index 属性来自定义索引
         index: null
     },
+    //请求类型
     dataType:"json",
+    //成功回执
     success:"success",
+    //类型
+    type:{
+        get:"get",
+        post:"post",
+        delete:"delete",
+        put:"put",
+    },
+    //构建表格
     table: function (className) {
         return '<table class="'+className+'-table '+className+'-table-bordered" cellspacing="0">';
     }
@@ -85,25 +97,44 @@ MonsterDataGrid.prototype = {
     render: function () {
 
     },
-    //构建html
-    builder:function(){
-
-    },
+    //统一构建
+    framework:(function(){
+        return {
+            //ajax请求类型
+            type:function(name){
+                return !!MonsterDataGrid.foundation.type[name]?MonsterDataGrid.foundation.type[name]:MonsterDataGrid.foundation.type.get;
+            },
+        }
+    })(),
     //请求数据
     request: function () {
         if (!this.config.url) {
-            throw Error("url error...")
+            throw new Error("url error...")
         }
-        $.ajax({
-            url:this.config.url,
-            type:this.config.ajaxType,
-            dataType:MonsterDataGrid.foundation.dataType
-        }).then(this.requestSuccess);
+        let that=this;
+        $.ajax({url:this.config.url, type:this.framework.type(this.config.type), dataType:MonsterDataGrid.foundation.dataType}).
+        then(function(data,result){
+            if(result!==MonsterDataGrid.foundation.success){
+                throw new Error("ajax request failed......")
+            }
+            that.parseData(data);
+        });
     },
-    requestSuccess:function(data,result){
-        if(result===MonsterDataGrid.foundation.success){
-
+    //解析数据
+    parseData(data){
+        this.data= data[this.config.request.data]?data[this.config.request.data]:null;
+        if(!this.data){
+            throw new Error("parse data error...");
         }
+        this.each();
+    },
+    //查找属性
+    findAttribute:function(data){
+        if(data.constructor !== Object){
+            throw Error("data type not matching object...")
+        }
+        console.log(data,this.config.columns)
+
     },
     //重载数据
     reload: function () {
@@ -111,14 +142,12 @@ MonsterDataGrid.prototype = {
     },
     //遍历
     each: function () {
-        if (this.config.columns.length < 1) {
-            throw Error("columns error");
+        if (this.config.columns.length < 1 || !Array.isArray(this.config.columns)) {
+            throw new Error("columns error....");
         }
-        let that = this;
-        this.config.columns.forEach(function (val, key) {
-
-        });
-        console.log(that.config.columns)
+        for(let i in this.data){
+            this.findAttribute(this.data[i])
+        }
     },
     //分页
     pagination: function () {
