@@ -169,8 +169,11 @@ MonsterDataGrid.prototype = {
         let arr = (this.columns.length < 1) ? this.config.columns : this.columns;
         //遍历字段
         arr.forEach((v, k) => {
-            let obj = (this.columns.length !== this.config.columns.length) ? $.extend({}, MonsterDataGrid.foundation.cols, v) : v;
-            this.columns.push(obj);
+            let obj =v;
+            if(this.columns.length !== this.config.columns.length){
+                obj=$.extend({}, MonsterDataGrid.foundation.cols, v);
+                this.columns.push(obj);
+            }
             func instanceof Function && func(obj, k)
         })
     },
@@ -191,7 +194,6 @@ MonsterDataGrid.prototype = {
             str +=(num%2!==0)?MonsterDataGrid.foundation.tr(MonsterDataGrid.foundation.odd):MonsterDataGrid.foundation.tr(MonsterDataGrid.foundation.even);
             this.columnEach((v, k) => {
                 str+=MonsterDataGrid.foundation.td(this.data[i][v.key])
-                // console.log(this.data[i][v.key])
             });
             num++;
         }
