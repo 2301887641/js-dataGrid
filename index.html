@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="font/iconfont.css">
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+    <style>
+        .monster-table {
+            font-family: "Poppins", sans-serif;
+            color: #67757c;
+            font-weight: 300;
+            width: 100%;
+            margin-bottom: 1rem;
+            background-color: transparent;
+        }
+        .monster-table-bordered {
+            border: 1px solid #dee2e6;
+        }
+        .monster-table thead th{
+            border: 0;
+            font-weight: 900;
+            text-align:left;
+            cursor: pointer;
+        }
+        .monster-table td, .monster-table th {
+            padding: .75rem;
+            vertical-align: top;
+            border: 1px solid #dee2e6;
+            border-bottom-width: 0;
+            border-left-width: 0;
+            white-space: nowrap;
+        }
+        .monster-table thead > tr > th.sorting_asc,
+        .monster-table thead > tr > th.sorting_desc,
+        .monster-table thead > tr > th.sorting,
+        .monster-table thead > tr > td.sorting_asc,
+        .monster-table thead > tr > td.sorting_desc,
+        .monster-table thead > tr > td.sorting {
+            padding-right: 30px;
+        }
+        .monster-table thead .sorting,
+        .monster-table thead .sorting_asc,
+        .monster-table thead .sorting_desc,
+        .monster-table thead .sorting_asc_disabled,
+        .monster-table thead .sorting_desc_disabled {
+            background: transparent;
+        }
+        .monster-table.table-bordered.dataTable th,
+        .monster-table.table-bordered.dataTable td {
+            border-left-width: 0;
+        }
+        .monster-table thead .sorting,
+        .monster-table thead .sorting_asc,
+        .monster-table thead .sorting_desc{
+            position: relative;
+        }
+        .monster-table tbody tr:nth-of-type(odd),.monster-table tbody tr:hover {
+            background: #f2f4f8;
+        }
+        .monster-table thead .sorting_asc:after {
+            content: "\f0de";
+            margin-left: 10px;
+            font-family: "iconfont";
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        .monster-table thead .sorting_desc:after {
+            content: "\f0dd";
+            margin-left: 10px;
+            font-family: "iconfont";
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        .monster-table thead .sorting:after {
+            content: "\e801";
+            margin-left: 10px;
+            font-family: "iconfont";
+            font-weight: 100;
+            right: 0.5em;
+            position: absolute;
+            bottom: 0.9em;
+            opacity: 0.3;
+        }
+    </style>
+    <script src="dataTable.js"></script>
+</head>
+<body>
+<!--class="monster-table monster-table-bordered"-->
+    <table cellspacing="0">
+      <!--  <thead>
+        <tr role="row">
+            <th class="sorting">姓名</th>
+            <th class="sorting">地点</th>
+            <th class="sorting">办公场所</th>
+            <th class="sorting">年龄</th>
+            <th class="sorting">日期</th>
+            <th class="sorting">金钱</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        <tr class="odd">
+            <td class="sorting">Airi Satou</td>
+            <td>Accountant</td>
+            <td>Tokyo</td>
+            <td>33</td>
+            <td>2008/11/28</td>
+            <td>$162,700</td>
+        </tr>
+        <tr class="even">
+            <td class="sorting">Angelica Ramos</td>
+            <td>Chief Executive Officer (CEO)</td>
+            <td>London</td>
+            <td>47</td>
+            <td>2009/10/09</td>
+            <td>$1,200,000</td>
+        </tr>
+        <tr class="odd">
+            <td class="sorting">Ashton Cox</td>
+            <td>Junior Technical Author</td>
+            <td>San Francisco</td>
+            <td>66</td>
+            <td>2009/01/12</td>
+            <td>$86,000</td>
+        </tr>
+        <tr class="even">
+            <td class="sorting">Bradley Greer</td>
+            <td>Software Engineer</td>
+            <td>London</td>
+            <td>41</td>
+            <td>2012/10/13</td>
+            <td>$132,000</td>
+        </tr>
+        <tr class="odd">
+            <td class="sorting">Brenden Wagner</td>
+            <td>Software Engineer</td>
+            <td>San Francisco</td>
+            <td>28</td>
+            <td>2011/06/07</td>
+            <td>$206,850</td>
+        </tr>
+        <tr class="even">
+            <td class="sorting">Brielle Williamson</td>
+            <td>Integration Specialist</td>
+            <td>New York</td>
+            <td>61</td>
+            <td>2012/12/02</td>
+            <td>$372,000</td>
+        </tr>
+        <tr class="odd">
+            <td class="sorting">Bruno Nash</td>
+            <td>Software Engineer</td>
+            <td>London</td>
+            <td>38</td>
+            <td>2011/05/03</td>
+            <td>$163,500</td>
+        </tr>
+        <tr class="even">
+            <td class="sorting">Caesar Vance</td>
+            <td>Pre-Sales Support</td>
+            <td>New York</td>
+            <td>21</td>
+            <td>2011/12/12</td>
+            <td>$106,450</td>
+        </tr>
+        <tr class="odd">
+            <td class="sorting">Cara Stevens</td>
+            <td>Sales Assistant</td>
+            <td>New York</td>
+            <td>46</td>
+            <td>2011/12/06</td>
+            <td>$145,600</td>
+        </tr>
+        <tr class="even">
+            <td class="sorting">Cedric Kelly</td>
+            <td>Senior Javascript Developer</td>
+            <td>Edinburgh</td>
+            <td>22</td>
+            <td>2012/03/29</td>
+            <td>$433,060</td>
+        </tr>
+        </tbody>-->
+    </table>
+</body>
+</html>
+<script>
+    new MonsterDataGrid({
+        url:"/1.php",
+        element: "table",
+        columns:[
+            {key:"123"},
+            {key:"567"}
+        ]
+    });
+</script>
