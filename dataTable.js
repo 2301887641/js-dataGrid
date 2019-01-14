@@ -128,7 +128,8 @@ MonsterDataGrid.prototype = {
         this.columnEach((v, k) => {
             head += MonsterDataGrid.foundation.th(v.title, !!v.sort ? v.sort : false)
         });
-        $(this.config.element).append($(table+MonsterDataGrid.foundation.tableHead(head)+MonsterDataGrid.foundation.tableBody(text)))
+        $(this.config.element).append($(table+MonsterDataGrid.foundation.tableHead(head)+MonsterDataGrid.foundation.tableBody(text)));
+        this.pagination()
     },
     //统一构建
     framework: (function () {
@@ -158,6 +159,7 @@ MonsterDataGrid.prototype = {
     },
     //解析数据
     parseData(data) {
+        this.oldRequestData=data;
         this.data = data[this.config.request.data] ? data[this.config.request.data] : null;
         if (!this.data) {
             throw new Error("parse data error...");
@@ -186,22 +188,42 @@ MonsterDataGrid.prototype = {
         if (this.config.columns.length < 1 || !Array.isArray(this.config.columns)) {
             throw new Error("columns error....");
         }
-        if (!Array.isArray(this.data)) {
+        if (!(this.data instanceof Object)){
             throw new Error("data type not matching object...");
         }
         let str = "",num=0;
         for (let i in this.data) {
             str +=(num%2!==0)?MonsterDataGrid.foundation.tr(MonsterDataGrid.foundation.odd):MonsterDataGrid.foundation.tr(MonsterDataGrid.foundation.even);
             this.columnEach((v, k) => {
-                str+=MonsterDataGrid.foundation.td(this.data[i][v.key])
-            });
+                if(this.data[i][v.key])
+                str+=MonsterDataGrid.foundation.td(this.data[i][v.key])});
             num++;
         }
         str+=(str.length>0)?"</tr>":"";
         this.render(str);
     },
+    //解析嵌套字符
+    parseNestedSymbol:function(name){
+        if(name.indexOf(this.config.nestedSymbol)!==-1){
+            let arr=this.config.request.pageName.split(this.config.nestedSymbol),
+                obj=this.oldRequestData,
+                value="";
+            while(arr.length>0 && obj[arr[0]]){
+                value=obj=obj[arr[0]];
+                arr.shift();
+            }
+            return value;
+        }
+        return this.oldRequestData[this.config.request.pageName];
+    },
     //分页
     pagination: function () {
+        if(this.config.request.page){
+            let pageNumber=Number.parseInt(this.parseNestedSymbol(this.config.request.pageName));
+            if(!pageNumber || pageNumber<1){
+                return;
+            }
 
+        }
     }
 };

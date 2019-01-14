@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" href="font/iconfont.css">
-    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <!--<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>-->
     <style>
         body{
             width:100%;
@@ -98,6 +99,9 @@
 <script>
     new MonsterDataGrid({
         url:"/1.php",
+        request:{
+          pageName: "data"
+        },
         columns:[
             {title:"姓名",key:"name",sort:true},
             {title:"年龄",key:"age"}
