@@ -1,6 +1,5 @@
 <?php
 $page=$_GET['pageNo'];
-sleep(3);
 if($page==="1"){
 $arr=array(
 "data"=>[

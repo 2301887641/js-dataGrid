@@ -11,26 +11,24 @@
             width: 90%;
             height: 900px;
         }
-
         .monster-table {
             font-family: "Poppins", sans-serif;
-            color: #67757c;
+            color: #6a7a8c;
             font-weight: 300;
             width: 100%;
+            height:100%;
+            margin:10px 0;
             background-color: transparent;
         }
-
         .monster-table-bordered {
             border: 1px solid #dee2e6;
         }
-
         .monster-table thead th {
             border: 0;
             font-weight: 900;
             text-align: left;
             cursor: pointer;
         }
-
         .monster-table td, .monster-table th {
             padding: .75rem;
             vertical-align: top;
@@ -39,7 +37,6 @@
             border-left-width: 0;
             white-space: nowrap;
         }
-
         .monster-table thead > tr > th.sorting_asc,
         .monster-table thead > tr > th.sorting_desc,
         .monster-table thead > tr > th.monster-th-sorting,
@@ -48,7 +45,6 @@
         .monster-table thead > tr > td.monster-th-sorting {
             padding-right: 30px;
         }
-
         .monster-table thead .monster-th-sorting,
         .monster-table thead .sorting_asc,
         .monster-table thead .sorting_desc,
@@ -56,22 +52,21 @@
         .monster-table thead .sorting_desc_disabled {
             background: transparent;
         }
-
         .monster-table.table-bordered.dataTable th,
         .monster-table.table-bordered.dataTable td {
             border-left-width: 0;
         }
-
         .monster-table thead .monster-th-sorting,
         .monster-table thead .sorting_asc,
         .monster-table thead .sorting_desc {
             position: relative;
         }
-
-        .monster-table tbody tr:nth-of-type(odd), .monster-table tbody tr:hover {
-            background: #f2f4f8;
+        .monster-table tbody tr:nth-of-type(odd){
+            background: #fcfcfc;
         }
-
+        .monster-table tbody tr:hover{
+            background:#c4e2ff;
+        }
         .monster-table thead .sorting_asc:after {
             content: "\f0de";
             margin-left: 10px;
@@ -79,7 +74,6 @@
             font-weight: 900;
             cursor: pointer;
         }
-
         .monster-table thead .sorting_desc:after {
             content: "\f0dd";
             margin-left: 10px;
@@ -87,7 +81,6 @@
             font-weight: 900;
             cursor: pointer;
         }
-
         .monster-table thead .monster-th-sorting:after {
             content: "\e801";
             margin-left: 10px;
@@ -107,25 +100,25 @@
             url('//at.alicdn.com/t/font_1021566_8590tuucwaq.ttf') format('truetype'),
             url('//at.alicdn.com/t/font_1021566_8590tuucwaq.svg#iconfont') format('svg');
         }
-        .monster-loading{
+        .monster-loading {
             position: absolute;
-            z-index:9999;
+            z-index: 9999;
             top: 0;
             right: 0;
             bottom: 0;
             left: 0;
-            color:#2d8cf0;
-            background-color: rgba(255,255,255,.9);
+            color: #2d8cf0;
+            background-color: rgba(255, 255, 255, .9);
         }
-        .monster-loading-wrapper{
+        .monster-loading-wrapper {
             text-align: center;
             position: relative;
             top: 38%;
             left: 50%;
-            transform: translate(-50%,-50%);
+            transform: translate(-50%, -50%);
         }
-        .monster-loading-icon{
-            font-family:"iconfont" !important;
+        .monster-loading-icon {
+            font-family: "iconfont" !important;
             display: inline-block;
             speak: none;
             font-style: normal;
@@ -141,11 +134,14 @@
         }
         @keyframes monster-spin {
             from {
-                transform: rotate(0deg); }
+                transform: rotate(0deg);
+            }
             50% {
-                transform: rotate(180deg); }
+                transform: rotate(180deg);
+            }
             to {
-                transform: rotate(360deg); }
+                transform: rotate(360deg);
+            }
         }
     </style>
     <style>

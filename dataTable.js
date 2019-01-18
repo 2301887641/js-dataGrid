@@ -1,4 +1,4 @@
-;(function (w, pageUi,loadUi) {
+;(function (w, pageUi, loadUi) {
     function MonsterDataGrid(config) {
         return new MonsterDataGrid.prototype.init(config);
     }
@@ -25,7 +25,9 @@
             //分页标识
             pageName: 'pageNo',
             //limit标识
-            limitName: 'pageSize'
+            limitName: 'pageSize',
+            //分页数量
+            pageSize:10
         },
         //元素
         element: "body",
@@ -98,12 +100,12 @@
             return "<thead><tr>" + th + "</tr></thead>";
         },
         //表格的th
-        th: function (className,obj) {
-            let cls="";
-            if(obj.sort){
-                cls+='-th-sorting';
+        th: function (className, obj) {
+            let cls = "";
+            if (obj.sort) {
+                cls += '-th-sorting';
             }
-            return '<th class="'+className+cls+'">' + obj.title + '</th>';
+            return '<th class="' + className + cls + '">' + obj.title + '</th>';
         },
         //表格的tbody
         tableBody: function (content) {
@@ -123,7 +125,7 @@
         //初始化方法
         init: function (config) {
             this.map = {};
-            this.load=this.page = this.head = this.body = this.table = null;
+            this.load = this.page = this.head = this.body = this.table = null;
             this.headHtml = "";
             this.config = $.extend(true, {}, MonsterDataGrid.config, config);
             this.request();
@@ -158,17 +160,21 @@
             }
         })(),
         //请求数据
-        request: function (pageNumber = 1) {
+        request: function (number = 1) {
             if (!this.config.url) {
                 throw new Error("url error...");
             }
-            if(!this.load){
-                this.load=loadUi({element:this.config.element});
+            if (!this.load) {
+                this.load = loadUi({element: this.config.element});
             }
             this.load.build();
-            let that = this, data = {}, location = this.config.request.pageName.lastIndexOf(this.config.nestedSymbol),
-                pageNo = (location !== -1) ? this.config.request.pageName.slice(location + 1) : this.config.request.pageName;
-            data.pageNo = pageNumber;
+            let that = this, data = {},
+                pageNameIndex = this.config.request.pageName.lastIndexOf(this.config.nestedSymbol),
+                pageSizeIndex = this.config.request.limitName.lastIndexOf(this.config.nestedSymbol),
+                pageSize = (pageSizeIndex !== -1) ? this.config.request.limitName.slice(pageSizeIndex + 1) : this.config.request.limitName,
+                pageNo = (pageNameIndex !== -1) ? this.config.request.pageName.slice(pageNameIndex + 1) : this.config.request.pageName;
+            data[pageNo] = number;
+            data[pageSize] = Number.parseInt(this.config.request.pageSize);
             $.ajax({
                 url: this.config.url,
                 type: this.framework.type(this.config.type),
@@ -184,7 +190,7 @@
         //解析数据
         parseData(data) {
             this.oldRequestData = data;
-            this.data = data[this.config.request.data] ? data[this.config.request.data] : null;
+            this.data = this.parseNestedSymbol(data, this.config.request.data)
             if (!this.data) {
                 throw new Error("parse data error...");
             }
@@ -196,7 +202,7 @@
             for (let i = 0, obj = null; i < this.config.columns.length; i++) {
                 obj = $.extend({}, MonsterDataGrid.foundation.cols, this.config.columns[i]);
                 this.map[obj.field] = obj;
-                this.headHtml += MonsterDataGrid.foundation.th(this.config.className,obj);
+                this.headHtml += MonsterDataGrid.foundation.th(this.config.className, obj);
             }
         },
         //遍历
@@ -212,7 +218,7 @@
             for (let i in this.data) {
                 if (this.data[i] instanceof Object) {
                     str += (num % 2 !== 0) ? MonsterDataGrid.foundation.tr(MonsterDataGrid.foundation.odd) : MonsterDataGrid.foundation.tr(MonsterDataGrid.foundation.even);
-                    for (let j in this.data[i]) {
+                    for (let j in this.map) {
                         if (this.map[j]) {
                             str += MonsterDataGrid.foundation.td(this.data[i][j]);
                         }
@@ -260,4 +266,4 @@
     if (!w.MonsterDataGrid) {
         w.monsterDataGrid = MonsterDataGrid;
     }
-})(window, monsterPagination,monsterLoading);
+})(window, monsterPagination, monsterLoading);
