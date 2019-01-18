@@ -7,25 +7,24 @@
     <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
     <!--<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>-->
     <style>
-        body{
-            width:100%;
-            height:900px;
+        body {
+            width: 90%;
+            height: 900px;
         }
         .monster-table {
             font-family: "Poppins", sans-serif;
             color: #67757c;
             font-weight: 300;
             width: 100%;
-            margin-bottom: 1rem;
             background-color: transparent;
         }
         .monster-table-bordered {
             border: 1px solid #dee2e6;
         }
-        .monster-table thead th{
+        .monster-table thead th {
             border: 0;
             font-weight: 900;
-            text-align:left;
+            text-align: left;
             cursor: pointer;
         }
         .monster-table td, .monster-table th {
@@ -57,10 +56,10 @@
         }
         .monster-table thead .sorting,
         .monster-table thead .sorting_asc,
-        .monster-table thead .sorting_desc{
+        .monster-table thead .sorting_desc {
             position: relative;
         }
-        .monster-table tbody tr:nth-of-type(odd),.monster-table tbody tr:hover {
+        .monster-table tbody tr:nth-of-type(odd), .monster-table tbody tr:hover {
             background: #f2f4f8;
         }
         .monster-table thead .sorting_asc:after {
@@ -70,7 +69,6 @@
             font-weight: 900;
             cursor: pointer;
         }
-
         .monster-table thead .sorting_desc:after {
             content: "\f0dd";
             margin-left: 10px;
@@ -78,7 +76,6 @@
             font-weight: 900;
             cursor: pointer;
         }
-
         .monster-table thead .sorting:after {
             content: "\e801";
             margin-left: 10px;
@@ -89,22 +86,70 @@
             bottom: 0.9em;
             opacity: 0.3;
         }
+
     </style>
+    <style>
+        .monster-page{
+            padding-top: 0.25em;
+        }
+        .monster-page .monster-page-container{
+            display:flex;
+            justify-content: flex-end;
+            white-space: nowrap;
+            list-style: none;
+            border-radius: .25rem;
+        }
+        .monster-page .monster-page-container .monster-page-item{
+            min-width: 1.5em;
+            color: #67757c;
+            text-align: center;
+            text-decoration: none;
+            user-select: none;
+            cursor: pointer;
+        }
+        .monster-page .monster-page-container .monster-page-item .monster-page-link,
+        .monster-page .monster-page-container .monster-pager-current-page .monster-page-link
+        {
+            display:block;
+            border: 1px solid #dee2e6;
+            color:#6a7a8c;
+            line-height: 1.25;
+            padding: .5rem .75rem;
+            text-decoration: none;
+            margin-left: -1px;
+        }
+        .monster-page .monster-page-container .monster-page-disabled .monster-page-link{
+            color:#ccc;
+            cursor: Default;
+        }
+        .monster-page .monster-page-container .monster-pager-current-page .monster-page-link,.monster-page .monster-page-container .monster-page-item .monster-page-link:hover{
+            background:#2962FF;
+            color:#fff;
+        }
+        .monster-page .monster-page-container .monster-page-disabled .monster-page-link:hover{
+            background:#fff;
+            color:#ccc;
+        }
+    </style>
+    <script src="page.js"></script>
+
     <script src="dataTable.js"></script>
 </head>
 <body>
-
+    <div class="table"></div>
 </body>
 </html>
 <script>
-    new MonsterDataGrid({
-        url:"/1.php",
-        request:{
-          pageName: "data"
+    monsterDataGrid({
+        element:".table",
+        url: "/1.php",
+        request: {
+            pageName: "data.pageNo",
+            total:"data.pageTotal"
         },
-        columns:[
-            {title:"姓名",key:"name",sort:true},
-            {title:"年龄",key:"age"}
+        columns: [
+            {title: "姓名", field: "name", sort: true},
+            {title: "年龄", field: "age"}
         ]
     });
 </script>

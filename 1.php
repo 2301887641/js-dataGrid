@@ -1,4 +1,6 @@
 <?php
+$page=$_GET['pageNo'];
+if($page==="1"){
 $arr=array(
 "data"=>[
     ["name"=>"张三",
@@ -9,10 +11,89 @@ $arr=array(
         "age"=>22,
         "address"=>"上海"
         ],
+            ["name"=>"李四",
+                "age"=>22,
+                "address"=>"上海"
+                ],
+                    ["name"=>"李四",
+                        "age"=>22,
+                        "address"=>"上海"
+                        ],    ["name"=>"李四",
+                                  "age"=>22,
+                                  "address"=>"上海"
+                                  ],
+                                      ["name"=>"李四",
+                                          "age"=>22,
+                                          "address"=>"上海"
+                                          ],
+                                              ["name"=>"李四",
+                                                  "age"=>22,
+                                                  "address"=>"上海"
+                                                  ],
+                                                      ["name"=>"李四",
+                                                          "age"=>22,
+                                                          "address"=>"上海"
+                                                          ],
+                                                              ["name"=>"李四",
+                                                                  "age"=>22,
+                                                                  "address"=>"上海"
+                                                                  ],
+                                                                      ["name"=>"李四",
+                                                                          "age"=>22,
+                                                                          "address"=>"上海"
+                                                                          ],
         "pageNo"=>1,
         "pageSize"=>10,
-        "totalCount"=>2
+        "pageTotal"=>11
 ],
 
 );
+}else{
+$arr=array(
+"data"=>[
+    ["name"=>"张三1",
+    "age"=>18,
+    "address"=>"北京1"
+    ],
+    ["name"=>"李四1",
+        "age"=>22,
+        "address"=>"上海1"
+        ],
+            ["name"=>"李四1",
+                "age"=>22,
+                "address"=>"上海1"
+                ],
+                    ["name"=>"李四1",
+                        "age"=>22,
+                        "address"=>"上海"
+                        ],    ["name"=>"李四",
+                                  "age"=>22,
+                                  "address"=>"上海"
+                                  ],
+                                      ["name"=>"李四",
+                                          "age"=>22,
+                                          "address"=>"上海"
+                                          ],
+                                              ["name"=>"李四",
+                                                  "age"=>22,
+                                                  "address"=>"上海"
+                                                  ],
+                                                      ["name"=>"李四",
+                                                          "age"=>22,
+                                                          "address"=>"上海"
+                                                          ],
+                                                              ["name"=>"李四",
+                                                                  "age"=>22,
+                                                                  "address"=>"上海"
+                                                                  ],
+                                                                      ["name"=>"李四",
+                                                                          "age"=>22,
+                                                                          "address"=>"上海"
+                                                                          ],
+        "pageNo"=>1,
+        "pageSize"=>10,
+        "pageTotal"=>11
+],
+);
+}
 echo json_encode($arr);
