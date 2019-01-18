@@ -5,12 +5,13 @@
     <title>Title</title>
     <link rel="stylesheet" href="font/iconfont.css">
     <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
-    <!--<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>-->
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_1021566_8590tuucwaq.css">
     <style>
         body {
             width: 90%;
             height: 900px;
         }
+
         .monster-table {
             font-family: "Poppins", sans-serif;
             color: #67757c;
@@ -18,15 +19,18 @@
             width: 100%;
             background-color: transparent;
         }
+
         .monster-table-bordered {
             border: 1px solid #dee2e6;
         }
+
         .monster-table thead th {
             border: 0;
             font-weight: 900;
             text-align: left;
             cursor: pointer;
         }
+
         .monster-table td, .monster-table th {
             padding: .75rem;
             vertical-align: top;
@@ -35,33 +39,39 @@
             border-left-width: 0;
             white-space: nowrap;
         }
+
         .monster-table thead > tr > th.sorting_asc,
         .monster-table thead > tr > th.sorting_desc,
-        .monster-table thead > tr > th.sorting,
+        .monster-table thead > tr > th.monster-th-sorting,
         .monster-table thead > tr > td.sorting_asc,
         .monster-table thead > tr > td.sorting_desc,
-        .monster-table thead > tr > td.sorting {
+        .monster-table thead > tr > td.monster-th-sorting {
             padding-right: 30px;
         }
-        .monster-table thead .sorting,
+
+        .monster-table thead .monster-th-sorting,
         .monster-table thead .sorting_asc,
         .monster-table thead .sorting_desc,
         .monster-table thead .sorting_asc_disabled,
         .monster-table thead .sorting_desc_disabled {
             background: transparent;
         }
+
         .monster-table.table-bordered.dataTable th,
         .monster-table.table-bordered.dataTable td {
             border-left-width: 0;
         }
-        .monster-table thead .sorting,
+
+        .monster-table thead .monster-th-sorting,
         .monster-table thead .sorting_asc,
         .monster-table thead .sorting_desc {
             position: relative;
         }
+
         .monster-table tbody tr:nth-of-type(odd), .monster-table tbody tr:hover {
             background: #f2f4f8;
         }
+
         .monster-table thead .sorting_asc:after {
             content: "\f0de";
             margin-left: 10px;
@@ -69,6 +79,7 @@
             font-weight: 900;
             cursor: pointer;
         }
+
         .monster-table thead .sorting_desc:after {
             content: "\f0dd";
             margin-left: 10px;
@@ -76,7 +87,8 @@
             font-weight: 900;
             cursor: pointer;
         }
-        .monster-table thead .sorting:after {
+
+        .monster-table thead .monster-th-sorting:after {
             content: "\e801";
             margin-left: 10px;
             font-family: "iconfont";
@@ -86,20 +98,70 @@
             bottom: 0.9em;
             opacity: 0.3;
         }
-
+        @font-face {
+            font-family: 'iconfont';  /* project id 1021566 */
+            src: url('//at.alicdn.com/t/font_1021566_8590tuucwaq.eot');
+            src: url('//at.alicdn.com/t/font_1021566_8590tuucwaq.eot?#iefix') format('embedded-opentype'),
+            url('//at.alicdn.com/t/font_1021566_8590tuucwaq.woff2') format('woff2'),
+            url('//at.alicdn.com/t/font_1021566_8590tuucwaq.woff') format('woff'),
+            url('//at.alicdn.com/t/font_1021566_8590tuucwaq.ttf') format('truetype'),
+            url('//at.alicdn.com/t/font_1021566_8590tuucwaq.svg#iconfont') format('svg');
+        }
+        .monster-loading{
+            position: absolute;
+            z-index:9999;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            color:#2d8cf0;
+            background-color: rgba(255,255,255,.9);
+        }
+        .monster-loading-wrapper{
+            text-align: center;
+            position: relative;
+            top: 38%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+        }
+        .monster-loading-icon{
+            font-family:"iconfont" !important;
+            display: inline-block;
+            speak: none;
+            font-style: normal;
+            font-weight: 400;
+            font-variant: normal;
+            text-transform: none;
+            text-rendering: auto;
+            line-height: 1;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            vertical-align: middle;
+            animation: monster-spin 1s linear infinite;
+        }
+        @keyframes monster-spin {
+            from {
+                transform: rotate(0deg); }
+            50% {
+                transform: rotate(180deg); }
+            to {
+                transform: rotate(360deg); }
+        }
     </style>
     <style>
-        .monster-page{
+        .monster-page {
             padding-top: 0.25em;
         }
-        .monster-page .monster-page-container{
-            display:flex;
+
+        .monster-page .monster-page-container {
+            display: flex;
             justify-content: flex-end;
             white-space: nowrap;
             list-style: none;
             border-radius: .25rem;
         }
-        .monster-page .monster-page-container .monster-page-item{
+
+        .monster-page .monster-page-container .monster-page-item {
             min-width: 1.5em;
             color: #67757c;
             text-align: center;
@@ -107,45 +169,48 @@
             user-select: none;
             cursor: pointer;
         }
+
         .monster-page .monster-page-container .monster-page-item .monster-page-link,
-        .monster-page .monster-page-container .monster-pager-current-page .monster-page-link
-        {
-            display:block;
+        .monster-page .monster-page-container .monster-pager-current-page .monster-page-link {
+            display: block;
             border: 1px solid #dee2e6;
-            color:#6a7a8c;
+            color: #6a7a8c;
             line-height: 1.25;
             padding: .5rem .75rem;
             text-decoration: none;
             margin-left: -1px;
         }
-        .monster-page .monster-page-container .monster-page-disabled .monster-page-link{
-            color:#ccc;
+
+        .monster-page .monster-page-container .monster-page-disabled .monster-page-link {
+            color: #ccc;
             cursor: Default;
         }
-        .monster-page .monster-page-container .monster-pager-current-page .monster-page-link,.monster-page .monster-page-container .monster-page-item .monster-page-link:hover{
-            background:#2962FF;
-            color:#fff;
+
+        .monster-page .monster-page-container .monster-pager-current-page .monster-page-link, .monster-page .monster-page-container .monster-page-item .monster-page-link:hover {
+            background: #2962FF;
+            color: #fff;
         }
-        .monster-page .monster-page-container .monster-page-disabled .monster-page-link:hover{
-            background:#fff;
-            color:#ccc;
+
+        .monster-page .monster-page-container .monster-page-disabled .monster-page-link:hover {
+            background: #fff;
+            color: #ccc;
         }
     </style>
     <script src="page.js"></script>
-
+    <script src="load.js"></script>
     <script src="dataTable.js"></script>
 </head>
 <body>
-    <div class="table"></div>
+<div class="table"></div>
 </body>
 </html>
 <script>
     monsterDataGrid({
-        element:".table",
+        element: ".table",
         url: "/1.php",
         request: {
             pageName: "data.pageNo",
-            total:"data.pageTotal"
+            total: "data.pageTotal"
         },
         columns: [
             {title: "姓名", field: "name", sort: true},

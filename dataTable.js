@@ -1,4 +1,4 @@
-;(function (w, pageUi) {
+;(function (w, pageUi,loadUi) {
     function MonsterDataGrid(config) {
         return new MonsterDataGrid.prototype.init(config);
     }
@@ -99,8 +99,11 @@
         },
         //表格的th
         th: function (className,obj) {
-
-            return '<th class="sorting">' + obj.title + '</th>' : '<th>' + name + '</th>';
+            let cls="";
+            if(obj.sort){
+                cls+='-th-sorting';
+            }
+            return '<th class="'+className+cls+'">' + obj.title + '</th>';
         },
         //表格的tbody
         tableBody: function (content) {
@@ -120,7 +123,7 @@
         //初始化方法
         init: function (config) {
             this.map = {};
-            this.page = this.head = this.body = this.table = null;
+            this.load=this.page = this.head = this.body = this.table = null;
             this.headHtml = "";
             this.config = $.extend(true, {}, MonsterDataGrid.config, config);
             this.request();
@@ -142,6 +145,7 @@
                 this.body = $(MonsterDataGrid.foundation.tableBody(text));
                 this.table.append(this.body)
             }
+            this.load.remove();
             this.pagination();
         },
         //统一构建
@@ -158,6 +162,10 @@
             if (!this.config.url) {
                 throw new Error("url error...");
             }
+            if(!this.load){
+                this.load=loadUi({element:this.config.element});
+            }
+            this.load.build();
             let that = this, data = {}, location = this.config.request.pageName.lastIndexOf(this.config.nestedSymbol),
                 pageNo = (location !== -1) ? this.config.request.pageName.slice(location + 1) : this.config.request.pageName;
             data.pageNo = pageNumber;
@@ -252,4 +260,4 @@
     if (!w.MonsterDataGrid) {
         w.monsterDataGrid = MonsterDataGrid;
     }
-})(window, monsterPagination);
+})(window, monsterPagination,monsterLoading);
