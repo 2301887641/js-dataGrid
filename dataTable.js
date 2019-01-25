@@ -66,7 +66,9 @@
             //对应列的类型。如果设置了 selection 则显示多选框；如果设置了 index 则显示该行的索引（从 1 开始计算）；如果设置了 expand 则显示为一个可展开的按钮
             columnType: null,
             //可以排序
-            sort: false
+            sort: false,
+            //记录百分比
+            percent: null,
         },
         //ajax
         success: "success",
@@ -145,40 +147,25 @@
                 //表格信息
                 dataGrid: {},
                 //列信息
-                column:{
-                    autoColNums:0,
+                column: {
+                    autoColNums: 0,
                     //记录列总数
-                    columnCount:0
+                    columnCount: 0
                 },
                 //宽度相关
-                width:{
+                width: {
                     //table的宽度
-                    tableWidth:this.parentWidth(),
+                    tableWidth: this.parentWidth(),
                     //所有列总宽度和
-                    countWidth : 0,
+                    countWidth: 0,
                     //自动列分配的宽度
-                    autoWidth:0
-                }
+                    autoWidth: 0
+                },
+                page:null
             };
-            this.load = this.page = null;
+            this.load = null;
             this.beforeRequest();
             this.request();
-        },
-        //获取滚动条宽度
-        getScrollWidth: function (elem) {
-            let width = 0;
-            if (elem) {
-                width = elem.offsetWidth - elem.clientWidth;
-            } else {
-                elem = document.createElement('div');
-                elem.style.width = '100px';
-                elem.style.height = '100px';
-                elem.style.overflowY = 'scroll';
-                document.body.appendChild(elem);
-                width = elem.offsetWidth - elem.clientWidth;
-                document.body.removeChild(elem);
-            }
-            return width;
         },
         //获取父元素宽度
         parentWidth: function () {
@@ -186,7 +173,8 @@
                 width = parent.width(), hide;
             try {
                 hide = parent.css('display') === 'none';
-            } catch (e) {}
+            } catch (e) {
+            }
             if (parent.length > 0 && (!width || hide)) {
                 return this.parentWidth(parent.parent());
             }
@@ -201,12 +189,15 @@
             //表格内容容器
             this.monster.dataGrid.boxContainer = $(this.proxy(MonsterDataGrid.foundation.box));
             //表格分页容器
-            this.monster.dataGrid.page = $(this.proxy(MonsterDataGrid.foundation.page));
+            this.monster.dataGrid.pageContainer = $(this.proxy(MonsterDataGrid.foundation.page));
 
             //----------------------插入表头容器------------------
             this.monster.dataGrid.dataGridContainer.append(this.monster.dataGrid.headerContainer);
             //插入内容容器
             this.monster.dataGrid.dataGridContainer.append(this.monster.dataGrid.boxContainer);
+            //插入分页容器
+            this.monster.dataGrid.dataGridContainer.append(this.monster.dataGrid.pageContainer);
+
 
             //------------------构建表头 表格html-------------------
             this.monster.dataGrid.headerTableElement = $(this.proxy(MonsterDataGrid.foundation.table));
@@ -235,6 +226,7 @@
 
             this.monster.dataGrid.boxContainer.append(this.monster.dataGrid.boxTableElement);
             //分页区域
+
         },
         //渲染表格
         render: function () {
@@ -242,54 +234,41 @@
             $(this.config.element).append(this.monster.dataGrid.dataGridContainer);
             this.pagination();
         },
-        //设置列宽
-        setColsWidth: function (map,t) {
-            return $(t);
-        },
+        //代理对象
         proxy: function (func) {
             let that = this;
             return (function (arg) {
                 return func.call(that, arg);
             })(arguments);
         },
-        //统一构建
-        framework: (function () {
-            return {
-                //ajax请求类型
-                type: function (name) {
-                    return !!MonsterDataGrid.foundation.type[name] ? MonsterDataGrid.foundation.type[name] : MonsterDataGrid.foundation.type.get;
-                }
-            }
-        })(),
         //请求数据
-        request:
-            function (number = 1) {
-                if (!this.config.url) {
-                    throw new Error("url error...");
+        request: function (number = 1) {
+            if (!this.config.url) {
+                throw new Error("url error...");
+            }
+            if (!this.load) {
+                this.load = loadUi({element: this.config.element});
+            }
+            this.load.build();
+            let that = this, data = {},
+                pageNameIndex = this.config.request.pageName.lastIndexOf(this.config.nestedSymbol),
+                pageSizeIndex = this.config.request.limitName.lastIndexOf(this.config.nestedSymbol),
+                pageSize = (pageSizeIndex !== -1) ? this.config.request.limitName.slice(pageSizeIndex + 1) : this.config.request.limitName,
+                pageNo = (pageNameIndex !== -1) ? this.config.request.pageName.slice(pageNameIndex + 1) : this.config.request.pageName;
+            data[pageNo] = number;
+            data[pageSize] = Number.parseInt(this.config.request.pageSize);
+            $.ajax({
+                url: this.config.url,
+                type: this.config.type,
+                data: data,
+                dataType: MonsterDataGrid.foundation.dataType
+            }).then(function (data, result) {
+                if (result !== MonsterDataGrid.foundation.success) {
+                    throw new Error("ajax request failed......");
                 }
-                if (!this.load) {
-                    this.load = loadUi({element: this.config.element});
-                }
-                this.load.build();
-                let that = this, data = {},
-                    pageNameIndex = this.config.request.pageName.lastIndexOf(this.config.nestedSymbol),
-                    pageSizeIndex = this.config.request.limitName.lastIndexOf(this.config.nestedSymbol),
-                    pageSize = (pageSizeIndex !== -1) ? this.config.request.limitName.slice(pageSizeIndex + 1) : this.config.request.limitName,
-                    pageNo = (pageNameIndex !== -1) ? this.config.request.pageName.slice(pageNameIndex + 1) : this.config.request.pageName;
-                data[pageNo] = number;
-                data[pageSize] = Number.parseInt(this.config.request.pageSize);
-                $.ajax({
-                    url: this.config.url,
-                    type: this.framework.type(this.config.type),
-                    data: data,
-                    dataType: MonsterDataGrid.foundation.dataType
-                }).then(function (data, result) {
-                    if (result !== MonsterDataGrid.foundation.success) {
-                        throw new Error("ajax request failed......");
-                    }
-                    that.parseData(data);
-                });
-            },
+                that.parseData(data);
+            });
+        },
         //解析数据
         parseData(data) {
             this.oldRequestData = data;
@@ -302,18 +281,18 @@
         //循环字段
         columnEach: function () {
             //遍历字段
-            for (let i = 0, width=null, obj = null; i < this.config.columns.length; i++) {
+            for (let i = 0, width = null, obj = null; i < this.config.columns.length; i++) {
                 obj = $.extend({}, MonsterDataGrid.foundation.cols, this.config.columns[i]);
-                width=obj.width;
+                width = obj.width;
                 //如果自定义了宽度 百分比
                 if (MonsterDataGrid.foundation.percent.test(width)) {
                     width = Math.floor((parseFloat(width) / 100) * this.monster.width.tableWidth);
                     width < this.config.cellMinWidth && (width = this.config.cellMinWidth);
-                }else if(width===0){
+                } else if (width === 0) {
                     this.monster.column.autoColNums++;
                 }
-                this.monster.width.countWidth +=  width;
-                this.fieldMapping[obj.field] ={field:obj, origin:this.proxy(MonsterDataGrid.foundation.th, obj)};
+                this.monster.width.countWidth += width;
+                this.fieldMapping[obj.field] = {field: obj, origin: this.proxy(MonsterDataGrid.foundation.th, obj)};
                 this.monster.column.columnCount++;
                 this.monster.dataGrid.headerTableBodyTrElement.append(this.fieldMapping[obj.field].origin);
             }
@@ -321,17 +300,22 @@
             (this.monster.width.tableWidth > this.monster.width.countWidth && this.monster.column.autoColNums) && (
                 this.monster.width.autoWidth = (this.monster.width.tableWidth - this.monster.width.countWidth) / this.monster.column.autoColNums);
         },
+        //设置列宽
+        setColsWidth: function (obj, t) {
+            return $(t).width(obj.field.width);
+        },
         //设置表头列宽
-        setColumnWidth:function(obj){
+        setColumnWidth: function (obj) {
             //给位分配宽的列平均分配宽
-            if(obj.field.width===0){
-                obj.field.width=Math.floor(this.monster.width.autoWidth >= this.config.cellMinWidth ? this.monster.width.autoWidth : this.config.cellMinWidth);
+            if (obj.field.width === 0) {
+                obj.field.width = Math.floor(this.monster.width.autoWidth >= this.config.cellMinWidth ? this.monster.width.autoWidth : this.config.cellMinWidth);
                 obj.origin.width(obj.field.width);
-                //给设定百分比的列分配列宽
-            }else if(MonsterDataGrid.foundation.percent.test(obj.field.width)){
-                obj.origin.width(Math.floor((parseFloat(obj.field.width.width) / 100) * this.monster.width.tableWidth));
+                //给设定百分比的列分配列宽 防止多次调用
+            } else if (MonsterDataGrid.foundation.percent.test(obj.field.width) && !obj.field.percent) {
+                obj.field.percent = obj.field.width;
+                obj.field.width = Math.floor((parseFloat(obj.field.width) / 100) * this.monster.width.tableWidth);
+                obj.origin.width(obj.field.width);
             }
-            console.log(obj.field.width)
         },
         //遍历
         each: function () {
@@ -348,7 +332,7 @@
                     for (let j in this.fieldMapping) {
                         if (this.fieldMapping[j]["field"]) {
                             this.setColumnWidth(this.fieldMapping[j]);
-                            tr.append(this.setColsWidth(this.fieldMapping[j],MonsterDataGrid.foundation.td(this.fieldMapping[j]["field"], this.data[i][j])));
+                            tr.append(this.setColsWidth(this.fieldMapping[j], MonsterDataGrid.foundation.td(this.fieldMapping[j]["field"], this.data[i][j])));
                             this.monster.dataGrid.boxTableBodyElement.append(tr);
                         }
                     }
@@ -360,7 +344,7 @@
         //解析嵌套字符
         parseNestedSymbol: function (data, name) {
             if (name.indexOf(this.config.nestedSymbol) !== -1) {
-                let arr = name.split(this.config.nestedSymbol), obj = data,value = "";
+                let arr = name.split(this.config.nestedSymbol), obj = data, value = "";
                 while (arr.length > 0 && obj[arr[0]]) {
                     value = obj = obj[arr[0]];
                     arr.shift();
@@ -372,15 +356,16 @@
         //分页
         pagination: function () {
             //开启分页
-            if (this.config.request.page && !this.page) {
+            if (this.config.request.page && !this.monster.page) {
                 let that = this,
                     pageNumber = Number.parseInt(this.parseNestedSymbol(this.oldRequestData, this.config.request.pageName)),
                     pageTotal = Number.parseInt(this.parseNestedSymbol(this.oldRequestData, this.config.request.total));
                 if (!pageNumber && !pageTotal) {
                     throw new Error("pagination error....");
                 }
-                this.page = pageUi({element: this.config.element, total: pageTotal,}).
-                on(pageUi.event.currentChange, function (page) {that.request(page)});
+                this.monster.page = pageUi({element:  this.monster.dataGrid.pageContainer, total: pageTotal,}).on(pageUi.event.currentChange, function (page) {
+                    that.request(page)
+                });
             }
         }
     };
