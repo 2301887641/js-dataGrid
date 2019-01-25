@@ -11,77 +11,101 @@
             width: 90%;
             height: 900px;
         }
-        .monster-table {
+        .monster-dataGrid {
             font-family: "Poppins", sans-serif;
             color: #6a7a8c;
-            font-weight: 300;
-            width: 100%;
-            height:100%;
-            margin:10px 0;
+            height: 100%;
+            margin: 10px 0;
             background-color: transparent;
         }
-        .monster-table-bordered {
+
+        .monster-dataGrid-box .monster-table-bordered {
             border: 1px solid #dee2e6;
         }
-        .monster-table thead th {
-            border: 0;
-            font-weight: 900;
-            text-align: left;
-            cursor: pointer;
-        }
-        .monster-table td, .monster-table th {
-            padding: .75rem;
-            vertical-align: top;
-            border: 1px solid #dee2e6;
-            border-bottom-width: 0;
-            border-left-width: 0;
+        .monster-dataGrid-page{
+            height: 41px;
             white-space: nowrap;
         }
+
+
+        .monster-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+        .monster-table  th {
+            text-align: left;
+        }
+
+        .monster-table td, .monster-table th {
+            padding: .75rem;
+            border: 1px solid #dee2e6;
+            border-bottom-width: 0;
+            box-sizing: border-box;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            word-break:keep-all;
+            white-space:nowrap;
+        }
+
         .monster-table thead > tr > th.sorting_asc,
         .monster-table thead > tr > th.sorting_desc,
-        .monster-table thead > tr > th.monster-th-sorting,
+        .monster-table tbody > tr > th.monster-th-sorting,
         .monster-table thead > tr > td.sorting_asc,
         .monster-table thead > tr > td.sorting_desc,
         .monster-table thead > tr > td.monster-th-sorting {
             padding-right: 30px;
         }
-        .monster-table thead .monster-th-sorting,
+
+        .monster-dataGrid-box-header .monster-table .monster-th-sorting,
         .monster-table thead .sorting_asc,
         .monster-table thead .sorting_desc,
         .monster-table thead .sorting_asc_disabled,
         .monster-table thead .sorting_desc_disabled {
             background: transparent;
         }
-        .monster-table.table-bordered.dataTable th,
+
+        ..monster-table.table-bordered.dataTable th,
         .monster-table.table-bordered.dataTable td {
             border-left-width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
         }
-        .monster-table thead .monster-th-sorting,
+
+        .monster-dataGrid-box-header .monster-table .monster-th-sorting,
         .monster-table thead .sorting_asc,
         .monster-table thead .sorting_desc {
             position: relative;
         }
-        .monster-table tbody tr:nth-of-type(odd){
+
+        .monster-table tbody tr:nth-of-type(odd) {
             background: #fcfcfc;
         }
-        .monster-table tbody tr:hover{
-            background:#c4e2ff;
+
+        .monster-dataGrid-box .monster-table tbody tr:hover {
+            background: #c4e2ff;
         }
-        .monster-table thead .sorting_asc:after {
+
+        .monster-table tbody .sorting_asc:after {
             content: "\f0de";
             margin-left: 10px;
             font-family: "iconfont";
             font-weight: 900;
             cursor: pointer;
         }
-        .monster-table thead .sorting_desc:after {
+
+        .monster-table tbody .sorting_desc:after {
             content: "\f0dd";
             margin-left: 10px;
             font-family: "iconfont";
             font-weight: 900;
             cursor: pointer;
         }
-        .monster-table thead .monster-th-sorting:after {
+
+        .monster-table tbody .monster-th-sorting:after {
             content: "\e801";
             margin-left: 10px;
             font-family: "iconfont";
