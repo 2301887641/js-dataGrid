@@ -130,7 +130,7 @@
         },
         //表格的td
         td: function (obj, title) {
-            return '<td>' + title + '</td>'
+            return '<td>' + (!!title?title:"") + '</td>'
         },
         //匹配百分比正则
         percent: /\d+%$/
@@ -326,6 +326,7 @@
                 throw new Error("data type not matching object...");
             }
             let tr = "", num = 0;
+            this.monster.dataGrid.boxTableBodyElement.empty()
             for (let i in this.data) {
                 if (this.data[i] instanceof Object) {
                     tr = (num % 2 !== 0) ? MonsterDataGrid.foundation.tr(MonsterDataGrid.foundation.odd) : MonsterDataGrid.foundation.tr(MonsterDataGrid.foundation.even);
