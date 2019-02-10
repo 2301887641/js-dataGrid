@@ -213,10 +213,13 @@
             //提前放入
             $(this.config.element).append(this.monster.dataGrid.dataGridContainer);
             this.columnEach();
+            //窗口改变
+            this.resize();
         },
         //渲染表格
         render: function () {
             this.load.remove();
+            //分页
             this.pagination();
         },
         //代理对象
@@ -265,13 +268,14 @@
         },
         //循环字段
         columnEach: function () {
+            this.monster.width.tableWidth=this.parentWidth();
             //遍历字段
             for (let i = 0, width = null, obj = null; i < this.config.columns.length; i++) {
                 obj = $.extend({}, MonsterDataGrid.foundation.cols, this.config.columns[i]);
                 width = obj.width;
                 //如果自定义了宽度 百分比
                 if (MonsterDataGrid.foundation.percent.test(width)) {
-                    width = Math.floor((parseFloat(width) / 100) * this.parentWidth());
+                    width = Math.floor((parseFloat(width) / 100) * this.monster.width.tableWidth);
                     width < this.config.cellMinWidth && (width = this.config.cellMinWidth);
                 } else if (width === 0) {
                     this.monster.column.autoColNums++;
@@ -281,26 +285,29 @@
                 this.fieldMapping[obj.field] = {field: obj, origin:thObj.cell};
                 this.monster.column.columnCount++;
                 this.monster.dataGrid.headerTableBodyTrElement.append(thObj.th);
-                this.monster.width.tableWidth=this.parentWidth();
             }
         },
         //设置列宽
         setColsWidth: function (obj, t) {
-            t.cell.width(obj.field.width);
+            //给未分配宽的列平均分配宽
+            if (obj.field.width === 0) {
+                t.cell.width(Math.floor(this.monster.width.autoWidth >= this.config.cellMinWidth ? this.monster.width.autoWidth : this.config.cellMinWidth));
+                //给设定百分比的列分配列宽 防止多次调用
+            } else if (MonsterDataGrid.foundation.percent.test(obj.field.width)) {
+                t.cell.width(Math.floor((parseFloat(obj.field.width) / 100) * this.monster.width.tableWidth));
+            } else {
+                t.cell.width(obj.field.width);
+            }
             return t.td;
         },
         //设置表头列宽
         setColumnWidth: function (obj) {
-            //给位分配宽的列平均分配宽
+            //给未分配宽的列平均分配宽
             if (obj.field.width === 0) {
-                console.log(11111,this.monster.width.autoWidth)
-                obj.field.width = Math.floor(this.monster.width.autoWidth >= this.config.cellMinWidth ? this.monster.width.autoWidth : this.config.cellMinWidth);
-                obj.origin.width(obj.field.width);
+                obj.origin.width(Math.floor(this.monster.width.autoWidth >= this.config.cellMinWidth ? this.monster.width.autoWidth : this.config.cellMinWidth));
                 //给设定百分比的列分配列宽 防止多次调用
-            } else if (MonsterDataGrid.foundation.percent.test(obj.field.width) && !obj.field.percent) {
-                obj.field.percent = obj.field.width;
-                obj.field.width = Math.floor((parseFloat(obj.field.width) / 100) * this.monster.width.tableWidth);
-                obj.origin.width(obj.field.width);
+            } else if (MonsterDataGrid.foundation.percent.test(obj.field.width)) {
+                obj.origin.width(Math.floor((parseFloat(obj.field.width) / 100) * this.monster.width.tableWidth));
             } else {
                 obj.origin.width(obj.field.width);
             }
@@ -314,6 +321,7 @@
                 throw new Error("data type not matching object...");
             }
             let tr = "", num = 0;
+            console.log(this.monster.width.tableWidth)
             this.monster.dataGrid.boxTableBodyElement.empty();
             //计算宽度
             (this.monster.width.tableWidth > this.monster.width.countWidth && this.monster.column.autoColNums) && (
@@ -346,6 +354,22 @@
                 return value;
             }
             return data[name];
+        },
+        throttle:function(method,context){
+            clearTimeout(method.tId);
+            method.tId=setTimeout(function(){
+                method.call(context);
+            },300);
+        },
+        resizeFunc:function(){
+            this.monster.width.tableWidth=this.parentWidth();
+            this.each();
+        },
+        resize:function(){
+            let that=this;
+            $(w).on("resize",function(){
+                that.throttle(that.resizeFunc,that)
+            });
         },
         //分页
         pagination: function () {
