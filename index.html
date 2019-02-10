@@ -7,10 +7,6 @@
     <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
     <link rel="stylesheet" href="//at.alicdn.com/t/font_1021566_8590tuucwaq.css">
     <style>
-        body {
-            width: 90%;
-            height: 900px;
-        }
         .monster-dataGrid {
             font-family: "Poppins", sans-serif;
             color: #6a7a8c;
@@ -18,19 +14,32 @@
             margin: 10px 0;
             background-color: transparent;
         }
-
+        .monster-dataGrid-box-header{
+            width:100%;
+            overflow: hidden;
+        }
         .monster-dataGrid-box .monster-table-bordered {
             border: 1px solid #dee2e6;
+            overflow: hidden;
+        }
+        .monster-td-cell{
+            height: 28px;
+            line-height: 28px;
+            padding: 0 15px;
+            position: relative;
+            box-sizing: border-box;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            word-break:keep-all;
+            white-space:nowrap;
         }
         .monster-dataGrid-page{
             height: 41px;
             white-space: nowrap;
         }
 
-
         .monster-table {
-            width: 100%;
-            table-layout: fixed;
+            width:auto;
             border-collapse: collapse;
             border-spacing: 0;
         }
@@ -39,14 +48,14 @@
         }
 
         .monster-table td, .monster-table th {
-            padding: .75rem;
-            border: 1px solid #dee2e6;
-            border-bottom-width: 0;
-            box-sizing: border-box;
-            overflow:hidden;
-            text-overflow:ellipsis;
-            word-break:keep-all;
-            white-space:nowrap;
+            padding: 5px 0;
+            position: relative;
+            min-height: 35px;
+            line-height: 35px;
+            font-size: 14px;
+            border-width: 1px;
+            border-style: solid;
+            border-color: #dee2e6;
         }
 
         .monster-table thead > tr > th.sorting_asc,
@@ -115,6 +124,7 @@
             bottom: 0.9em;
             opacity: 0.3;
         }
+
         @font-face {
             font-family: 'iconfont';  /* project id 1021566 */
             src: url('//at.alicdn.com/t/font_1021566_8590tuucwaq.eot');
@@ -124,6 +134,7 @@
             url('//at.alicdn.com/t/font_1021566_8590tuucwaq.ttf') format('truetype'),
             url('//at.alicdn.com/t/font_1021566_8590tuucwaq.svg#iconfont') format('svg');
         }
+
         .monster-loading {
             position: absolute;
             z-index: 9999;
@@ -134,6 +145,7 @@
             color: #2d8cf0;
             background-color: rgba(255, 255, 255, .9);
         }
+
         .monster-loading-wrapper {
             text-align: center;
             position: relative;
@@ -141,6 +153,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
+
         .monster-loading-icon {
             font-family: "iconfont" !important;
             display: inline-block;
@@ -156,6 +169,7 @@
             vertical-align: middle;
             animation: monster-spin 1s linear infinite;
         }
+
         @keyframes monster-spin {
             from {
                 transform: rotate(0deg);
