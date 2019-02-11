@@ -14,37 +14,49 @@
             margin: 10px 0;
             background-color: transparent;
         }
-        .monster-dataGrid-box-header{
-            width:100%;
+
+        .monster-dataGrid-box-header {
+            width: 100%;
             overflow: hidden;
         }
+
         .monster-dataGrid-box .monster-table-bordered {
             border: 1px solid #dee2e6;
             overflow: hidden;
         }
-        .monster-td-cell{
+
+        .monster-table-th-cell,.monster-table-td-cell {
             height: 28px;
             line-height: 28px;
             padding: 0 15px;
             position: relative;
             box-sizing: border-box;
-            overflow:hidden;
-            text-overflow:ellipsis;
-            word-break:keep-all;
-            white-space:nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: keep-all;
+            white-space: nowrap;
         }
-        .monster-dataGrid-page{
+
+        .monster-dataGrid-page {
             height: 41px;
             white-space: nowrap;
         }
 
         .monster-table {
-            width:auto;
+            width: auto;
             border-collapse: collapse;
             border-spacing: 0;
         }
-        .monster-table  th {
+
+        .monster-table th {
             text-align: left;
+        }
+
+        .monster-table th:first-child {
+            border-left: none;
+        }
+        .monster-table th:last-child{
+            border-right:none;
         }
 
         .monster-table td, .monster-table th {

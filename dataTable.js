@@ -120,18 +120,18 @@
         },
         //表格th
         th: function (arg) {
-            let th = $('<th>'), cell = $("<div class='monster-td-cell'>");
+            let th = $('<th>'), cell = $("<div class='" + this.config.className + "-table-th-cell'>");
             arg[1]["sort"] && th.addClass(this.config.className + MonsterDataGrid.foundation.sortClass);
             cell.html(arg[1].title);
             th.append(cell);
             return {th, cell};
         },
         //表格的td
-        td: function (obj, title) {
-            let td=$("<td>"),cell=$("<div class='monster-td-cell'>");
-            cell.html(!!title ? title : "");
+        td: function (arg) {
+            let td = $("<td>"), cell = $("<div class='" + this.config.className + "-table-td-cell'>");
+            cell.html(!!arg[1] ? arg[1] : "");
             td.append(cell);
-            return {td,cell};
+            return {td, cell};
         },
         //匹配百分比正则
         percent: /\d+%$/
@@ -151,7 +151,7 @@
                 column: {
                     autoColNums: 0,
                     //记录列总数
-                    columnCount: 0
+                    columnCount: 0,
                 },
                 //宽度相关
                 width: {
@@ -160,10 +160,15 @@
                     //所有列总宽度和
                     countWidth: 0,
                     //自动列分配的宽度
-                    autoWidth: 0
+                    autoWidth: 0,
+                    //th单元格的总宽度
+                    thCellCountWidth:0,
+                    //tr单元格的总宽度
+                    tdCellCountWidth:0
                 },
                 page: null
             };
+            this.trWidth = 0;
             this.load = null;
             this.beforeRequest();
             this.request();
@@ -201,7 +206,6 @@
             this.monster.dataGrid.headerTableBodyTrElement = MonsterDataGrid.foundation.tr();
 
             //---------------------遍历表头-----------------------
-
             //-----------构建表格内容html-------------
             this.monster.dataGrid.boxTableElement = $(this.proxy(MonsterDataGrid.foundation.table));
             //构建表格主体
@@ -268,7 +272,7 @@
         },
         //循环字段
         columnEach: function () {
-            this.monster.width.tableWidth=this.parentWidth();
+            this.monster.width.tableWidth = this.parentWidth();
             //遍历字段
             for (let i = 0, width = null, obj = null; i < this.config.columns.length; i++) {
                 obj = $.extend({}, MonsterDataGrid.foundation.cols, this.config.columns[i]);
@@ -282,34 +286,55 @@
                 }
                 this.monster.width.countWidth += width;
                 let thObj = this.proxy(MonsterDataGrid.foundation.th, obj);
-                this.fieldMapping[obj.field] = {field: obj, origin:thObj.cell};
                 this.monster.column.columnCount++;
                 this.monster.dataGrid.headerTableBodyTrElement.append(thObj.th);
+                this.fieldMapping[obj.field] = {
+                    ordinal: i + 1,
+                    field: obj,
+                    origin: thObj.cell,
+                    tr: this.monster.dataGrid.headerTableBodyTrElement
+                };
             }
         },
         //设置列宽
         setColsWidth: function (obj, t) {
-            //给未分配宽的列平均分配宽
-            if (obj.field.width === 0) {
-                t.cell.width(Math.floor(this.monster.width.autoWidth >= this.config.cellMinWidth ? this.monster.width.autoWidth : this.config.cellMinWidth));
-                //给设定百分比的列分配列宽 防止多次调用
-            } else if (MonsterDataGrid.foundation.percent.test(obj.field.width)) {
-                t.cell.width(Math.floor((parseFloat(obj.field.width) / 100) * this.monster.width.tableWidth));
-            } else {
-                t.cell.width(obj.field.width);
-            }
+            this.computedWidth(obj,t.cell,"td")
             return t.td;
         },
         //设置表头列宽
         setColumnWidth: function (obj) {
+            this.computedWidth(obj,obj.origin,"th")
+        },
+        //最后一列的宽度
+        lastColumnWidth(target,cellCountWidth){
+            //2像素的表格边框
+            target.width((this.monster.width.tableWidth - cellCountWidth-(this.config.columns.length-1)>0) ? this.monster.width.tableWidth - cellCountWidth-(this.config.columns.length-1)-2 : this.config.cellMinWidth);
+        },
+        //计算表头和列的宽度
+        computedWidth(obj,target,type){
             //给未分配宽的列平均分配宽
             if (obj.field.width === 0) {
-                obj.origin.width(Math.floor(this.monster.width.autoWidth >= this.config.cellMinWidth ? this.monster.width.autoWidth : this.config.cellMinWidth));
-                //给设定百分比的列分配列宽 防止多次调用
+                target.width(Math.floor(this.monster.width.autoWidth >= this.config.cellMinWidth ? this.monster.width.autoWidth : this.config.cellMinWidth));
             } else if (MonsterDataGrid.foundation.percent.test(obj.field.width)) {
-                obj.origin.width(Math.floor((parseFloat(obj.field.width) / 100) * this.monster.width.tableWidth));
+                //给设定百分比的列分配列宽 防止多次调用
+                target.width(Math.floor((parseFloat(obj.field.width) / 100) * this.monster.width.tableWidth));
             } else {
-                obj.origin.width(obj.field.width);
+                target.width(obj.field.width);
+            }
+            if (obj.ordinal === this.config.columns.length) {
+                if(type==="th"){
+                    this.lastColumnWidth(target,this.monster.width.thCellCountWidth);
+                    this.monster.width.thCellCountWidth = 0;
+                }else{
+                    this.lastColumnWidth(target,this.monster.width.tdCellCountWidth);
+                    this.monster.width.tdCellCountWidth = 0;
+                }
+            } else {
+                if(type==="th"){
+                    this.monster.width.thCellCountWidth += target.width();
+                }else{
+                    this.monster.width.tdCellCountWidth += target.width();
+                }
             }
         },
         //遍历
@@ -321,7 +346,6 @@
                 throw new Error("data type not matching object...");
             }
             let tr = "", num = 0;
-            console.log(this.monster.width.tableWidth)
             this.monster.dataGrid.boxTableBodyElement.empty();
             //计算宽度
             (this.monster.width.tableWidth > this.monster.width.countWidth && this.monster.column.autoColNums) && (
@@ -332,7 +356,7 @@
                     for (let j in this.fieldMapping) {
                         if (this.fieldMapping[j]["field"]) {
                             this.setColumnWidth(this.fieldMapping[j]);
-                            tr.append(this.setColsWidth(this.fieldMapping[j], MonsterDataGrid.foundation.td(this.fieldMapping[j]["field"], this.data[i][j])));
+                            tr.append(this.setColsWidth(this.fieldMapping[j], this.proxy(MonsterDataGrid.foundation.td, this.data[i][j])));
                             this.monster.dataGrid.boxTableBodyElement.append(tr);
                         }
                     }
@@ -355,20 +379,20 @@
             }
             return data[name];
         },
-        throttle:function(method,context){
+        throttle: function (method, context) {
             clearTimeout(method.tId);
-            method.tId=setTimeout(function(){
+            method.tId = setTimeout(function () {
                 method.call(context);
-            },300);
+            }, 300);
         },
-        resizeFunc:function(){
-            this.monster.width.tableWidth=this.parentWidth();
+        resizeFunc: function () {
+            this.monster.width.tableWidth = this.parentWidth();
             this.each();
         },
-        resize:function(){
-            let that=this;
-            $(w).on("resize",function(){
-                that.throttle(that.resizeFunc,that)
+        resize: function () {
+            let that = this;
+            $(w).on("resize", function () {
+                that.throttle(that.resizeFunc, that)
             });
         },
         //分页
