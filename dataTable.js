@@ -43,32 +43,24 @@
         cellMinWidth: 60
     };
     MonsterDataGrid.foundation = {
-        //表格列的配置描述
+        //表格列的配置描述 有几个不存在的属性field要和返回的数据列对应的字段属性,customColumn自定义列渲染,ordinal自定义列渲染排序
         cols: {
             //列头显示文字
             title: "无",
-            //对应列内容的字段名
-            field: "field",
             //列宽
             width: 0,
-            //最小列宽
-            minWidth: null,
-            //最大列宽
-            maxWidth: null,
             //对齐方式，可选值为 left 左对齐、right 右对齐和 center 居中对齐
             align: "left",
             //开启后，文本将不换行，超出部分显示为省略号
             ellipsis: false,
             //自定义渲染列
-            render: null,
+            render: $.noop,
             //自定义列头显示内容
-            renderHeader: null,
+            renderHeader: $.noop,
             //对应列的类型。如果设置了 selection 则显示多选框；如果设置了 index 则显示该行的索引（从 1 开始计算）；如果设置了 expand 则显示为一个可展开的按钮
-            columnType: null,
+            columnType: $.noop,
             //可以排序
-            sort: false,
-            //记录百分比
-            percent: null,
+            sort: false
         },
         //ajax
         success: "success",
@@ -78,14 +70,18 @@
         odd: "odd",
         //偶数class
         even: "even",
-        //类型
-        type: {
-            get: "get",
-            post: "post",
-            delete: "delete",
-            put: "put",
-        },
+        //排序class
         sortClass: "-th-sorting",
+        //自定义列名称记录
+        customField: "_Monster_dataTable_",
+        //自定义 编辑和删除列
+        customColumnRender: function () {
+            return {
+                cell: $("<div class='" + this.config.className + "-table-td-customCell'>"),
+                edit: $('<button class="' + this.config.className + '-table-td-customBtn '+this.config.className+'-table-td-primaryBtn">编辑</button>'),
+                del: $('<button class="' + this.config.className + '-table-td-customBtn '+this.config.className+'-table-td-delBtn">删除</button>')
+            }
+        },
         //数据表格容器
         dataGrid: function () {
             return '<div class="' + this.config.className + '-dataGrid">';
@@ -162,13 +158,15 @@
                     //自动列分配的宽度
                     autoWidth: 0,
                     //th单元格的总宽度
-                    thCellCountWidth:0,
+                    thCellCountWidth: 0,
                     //tr单元格的总宽度
-                    tdCellCountWidth:0
+                    tdCellCountWidth: 0
                 },
-                page: null
+                //分页
+                page: null,
+                //自定义列
+                customColumn: null
             };
-            this.trWidth = 0;
             this.load = null;
             this.beforeRequest();
             this.request();
@@ -188,6 +186,7 @@
         },
         //请求之前
         beforeRequest: function () {
+
             //------------------表格容器------------------
             this.monster.dataGrid.dataGridContainer = $(this.proxy(MonsterDataGrid.foundation.dataGrid));
             //表格内容容器
@@ -214,17 +213,34 @@
             //------------插入表格内容------------------
             this.monster.dataGrid.boxTableElement.append(this.monster.dataGrid.boxTableBodyElement);
             this.monster.dataGrid.boxContainer.append(this.monster.dataGrid.boxTableElement);
+
             //提前放入
             $(this.config.element).append(this.monster.dataGrid.dataGridContainer);
+            //遍历表头
             this.columnEach();
             //窗口改变
             this.resize();
         },
         //渲染表格
         render: function () {
-            this.load.remove();
+            //暂时关闭loading层
+            // this.load.remove();
             //分页
             this.pagination();
+        },
+        //自动列渲染
+        autoColumnRender: function (obj) {
+            let render = this.proxy(MonsterDataGrid.foundation.customColumnRender);
+            for (let i = 0; i < obj.length; i++) {
+                if (obj[i].editColumn) {
+                    render.cell.append(render.edit);
+                    continue;
+                }
+                if (obj[i].delColumn) {
+                    render.cell.append(render.del);
+                }
+            }
+            return render.cell;
         },
         //代理对象
         proxy: function (func) {
@@ -238,10 +254,10 @@
             if (!this.config.url) {
                 throw new Error("url error...");
             }
-            if (!this.load) {
-                this.load = loadUi({element: this.config.element});
-            }
-            this.load.build();
+            // if (!this.load) {
+            //     this.load = loadUi({element: this.config.element});
+            // }
+            // this.load.build();
             let that = this, data = {},
                 pageNameIndex = this.config.request.pageName.lastIndexOf(this.config.nestedSymbol),
                 pageSizeIndex = this.config.request.limitName.lastIndexOf(this.config.nestedSymbol),
@@ -270,13 +286,16 @@
             }
             this.each();
         },
-        //循环字段
+        //循环字段 计算宽度
         columnEach: function () {
             this.monster.width.tableWidth = this.parentWidth();
             //遍历字段
-            for (let i = 0, width = null, obj = null; i < this.config.columns.length; i++) {
+            for (let i = 0, that = this, width = null, obj = null; i < this.config.columns.length; i++) {
                 obj = $.extend({}, MonsterDataGrid.foundation.cols, this.config.columns[i]);
                 width = obj.width;
+                if (!obj.hasOwnProperty("field") && !obj.hasOwnProperty("customField")) {
+                    break;
+                }
                 //如果自定义了宽度 百分比
                 if (MonsterDataGrid.foundation.percent.test(width)) {
                     width = Math.floor((parseFloat(width) / 100) * this.monster.width.tableWidth);
@@ -288,30 +307,44 @@
                 let thObj = this.proxy(MonsterDataGrid.foundation.th, obj);
                 this.monster.column.columnCount++;
                 this.monster.dataGrid.headerTableBodyTrElement.append(thObj.th);
-                this.fieldMapping[obj.field] = {
-                    ordinal: i + 1,
-                    field: obj,
-                    origin: thObj.cell,
-                    tr: this.monster.dataGrid.headerTableBodyTrElement
-                };
+                //如果配置了field字段
+                if (obj.hasOwnProperty("field") && (!obj.hasOwnProperty("customField"))) {
+                    this.fieldMapping[obj.field] = {
+                        ordinal: i + 1,
+                        field: obj,
+                        origin: thObj.cell,
+                        tr: this.monster.dataGrid.headerTableBodyTrElement
+                    }
+                } else if (!obj.hasOwnProperty("field") && (obj.hasOwnProperty("customField"))) {
+                    if (!obj.column instanceof Array) {
+                        break;
+                    }
+                    this.monster.customColumn = obj.column;
+                    this.fieldMapping[MonsterDataGrid.foundation.customField] = {
+                        ordinal: i + 1,
+                        field: obj,
+                        origin: thObj.cell,
+                        tr: this.monster.dataGrid.headerTableBodyTrElement
+                    }
+                }
             }
         },
         //设置列宽
         setColsWidth: function (obj, t) {
-            this.computedWidth(obj,t.cell,"td")
+            this.computedWidth(obj, t.cell, "td");
             return t.td;
         },
         //设置表头列宽
         setColumnWidth: function (obj) {
-            this.computedWidth(obj,obj.origin,"th")
+            this.computedWidth(obj, obj.origin, "th")
         },
         //最后一列的宽度
-        lastColumnWidth(target,cellCountWidth){
+        lastColumnWidth(target, cellCountWidth) {
             //2像素的表格边框
-            target.width((this.monster.width.tableWidth - cellCountWidth-(this.config.columns.length-1)>0) ? this.monster.width.tableWidth - cellCountWidth-(this.config.columns.length-1)-2 : this.config.cellMinWidth);
+            target.width((this.monster.width.tableWidth - cellCountWidth - (this.config.columns.length - 1) > 0) ? this.monster.width.tableWidth - cellCountWidth - (this.config.columns.length - 1) - 2 : this.config.cellMinWidth);
         },
         //计算表头和列的宽度
-        computedWidth(obj,target,type){
+        computedWidth(obj, target, type) {
             //给未分配宽的列平均分配宽
             if (obj.field.width === 0) {
                 target.width(Math.floor(this.monster.width.autoWidth >= this.config.cellMinWidth ? this.monster.width.autoWidth : this.config.cellMinWidth));
@@ -322,17 +355,17 @@
                 target.width(obj.field.width);
             }
             if (obj.ordinal === this.config.columns.length) {
-                if(type==="th"){
-                    this.lastColumnWidth(target,this.monster.width.thCellCountWidth);
+                if (type === "th") {
+                    this.lastColumnWidth(target, this.monster.width.thCellCountWidth);
                     this.monster.width.thCellCountWidth = 0;
-                }else{
-                    this.lastColumnWidth(target,this.monster.width.tdCellCountWidth);
+                } else {
+                    this.lastColumnWidth(target, this.monster.width.tdCellCountWidth);
                     this.monster.width.tdCellCountWidth = 0;
                 }
             } else {
-                if(type==="th"){
+                if (type === "th") {
                     this.monster.width.thCellCountWidth += target.width();
-                }else{
+                } else {
                     this.monster.width.tdCellCountWidth += target.width();
                 }
             }
@@ -354,11 +387,16 @@
                 if (this.data[i] instanceof Object) {
                     tr = (num % 2 !== 0) ? MonsterDataGrid.foundation.tr(MonsterDataGrid.foundation.odd) : MonsterDataGrid.foundation.tr(MonsterDataGrid.foundation.even);
                     for (let j in this.fieldMapping) {
+                        //如果存在field字段的话
                         if (this.fieldMapping[j]["field"]) {
                             this.setColumnWidth(this.fieldMapping[j]);
-                            tr.append(this.setColsWidth(this.fieldMapping[j], this.proxy(MonsterDataGrid.foundation.td, this.data[i][j])));
-                            this.monster.dataGrid.boxTableBodyElement.append(tr);
                         }
+                        if (j !== MonsterDataGrid.foundation.customField) {
+                            tr.append(this.setColsWidth(this.fieldMapping[j], this.proxy(MonsterDataGrid.foundation.td, this.data[i][j])));
+                        } else if (j === MonsterDataGrid.foundation.customField && this.monster.customColumn) {
+                            tr.append(this.setColsWidth(this.fieldMapping[j], this.proxy(MonsterDataGrid.foundation.td, this.autoColumnRender(this.monster.customColumn))));
+                        }
+                        this.monster.dataGrid.boxTableBodyElement.append(tr);
                     }
                 }
                 num++;

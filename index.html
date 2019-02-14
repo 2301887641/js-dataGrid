@@ -7,10 +7,13 @@
     <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
     <link rel="stylesheet" href="//at.alicdn.com/t/font_1021566_8590tuucwaq.css">
     <style>
+        *{
+            /*去除蓝边*/
+            outline: none;
+        }
         .monster-dataGrid {
             font-family: "Poppins", sans-serif;
             color: #6a7a8c;
-            height: 100%;
             margin: 10px 0;
             background-color: transparent;
         }
@@ -25,7 +28,7 @@
             overflow: hidden;
         }
 
-        .monster-table-th-cell,.monster-table-td-cell {
+        .monster-table-th-cell, .monster-table-td-cell {
             height: 28px;
             line-height: 28px;
             padding: 0 15px;
@@ -35,6 +38,33 @@
             text-overflow: ellipsis;
             word-break: keep-all;
             white-space: nowrap;
+        }
+
+        .monster-table-td-customCell{
+            width:100%;
+            height:100%;
+            text-align:center;
+        }
+
+        .monster-table-td-customBtn{
+            margin-right:5px;
+            border:none;
+            border-radius: 2px;
+            padding:4px 7px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .monster-table-td-primaryBtn{
+            background:#009688;
+            border-color:#009688;
+            color:#fff;
+        }
+
+        .monster-table-td-delBtn{
+            background:#FF5722;
+            border-color:#FF5722;
+            color:#fff;
         }
 
         .monster-dataGrid-page {
@@ -55,8 +85,9 @@
         .monster-table th:first-child {
             border-left: none;
         }
-        .monster-table th:last-child{
-            border-right:none;
+
+        .monster-table th:last-child {
+            border-right: none;
         }
 
         .monster-table td, .monster-table th {
