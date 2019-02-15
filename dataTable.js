@@ -1,4 +1,4 @@
-;(function (w, pageUi, loadUi) {
+;(function (w, pageUi, loadUi,lay) {
     function MonsterDataGrid(config) {
         return new MonsterDataGrid.prototype.init(config);
     }
@@ -74,12 +74,16 @@
         sortClass: "-th-sorting",
         //自定义列名称记录
         customField: "_Monster_dataTable_",
+        //编辑
+        customEditColumnString:"编辑",
+        //删除
+        customDelColumnString:"删除",
         //自定义 编辑和删除列
         customColumnRender: function () {
             return {
                 cell: $("<div class='" + this.config.className + "-table-td-customCell'>"),
-                edit: $('<button class="' + this.config.className + '-table-td-customBtn '+this.config.className+'-table-td-primaryBtn">编辑</button>'),
-                del: $('<button class="' + this.config.className + '-table-td-customBtn '+this.config.className+'-table-td-delBtn">删除</button>')
+                edit: $('<button class="' + this.config.className + '-table-td-customBtn '+this.config.className+'-table-td-primaryBtn">'+MonsterDataGrid.foundation.customEditColumnString+'</button>'),
+                del: $('<button class="' + this.config.className + '-table-td-customBtn '+this.config.className+'-table-td-delBtn">'+MonsterDataGrid.foundation.customDelColumnString+'</button>')
             }
         },
         //数据表格容器
@@ -130,7 +134,48 @@
             return {td, cell};
         },
         //匹配百分比正则
-        percent: /\d+%$/
+        percent: /\d+%$/,
+        //发布订阅模式
+        observer: {
+            //缓存列表
+            clientList: [],
+            //订阅函数
+            listen: function (key, fn) {
+                if (!this.clientList[key])
+                    this.clientList[key] = [];
+                this.clientList[key].push(fn);
+            },
+            //发布函数
+            trigger: function () {
+                let key = Array.prototype.shift.call(arguments);
+                let fns = this.clientList[key];
+                if (!fns || fns.length === 0)
+                    return false;
+                for (let i = 0, fn; fn = fns[i++];) {
+                    fn.apply(this, arguments);
+                }
+            },
+            //删除函数
+            remove: function (key, fn) {
+                let fns = this.clientList[key];
+                if (!fns || fns.length === 0)
+                    return false;
+                if (!fn) {
+                    fns && (fns.length = 0);
+                } else {
+                    for (let i = fns.length - 1; i >= 0; i--) {
+                        let _fn = fns[i];
+                        if (_fn === fn) {
+                            fns.splice(i, 1);
+                        }
+                    }
+                }
+            }
+        },
+        //存放自定义按钮事件
+        btnEvent:[],
+        //自定义按钮事件名称
+        btnEventName:"monster_custom_btn"
     };
     MonsterDataGrid.prototype = {
         construct: MonsterDataGrid,
@@ -167,7 +212,7 @@
                 //自定义列
                 customColumn: null
             };
-            this.load = null;
+            // this.load = null;
             this.beforeRequest();
             this.request();
         },
@@ -186,7 +231,6 @@
         },
         //请求之前
         beforeRequest: function () {
-
             //------------------表格容器------------------
             this.monster.dataGrid.dataGridContainer = $(this.proxy(MonsterDataGrid.foundation.dataGrid));
             //表格内容容器
@@ -228,16 +272,53 @@
             //分页
             this.pagination();
         },
+        //绑定事件
+        on: function (type, handler) {
+            let that = this;
+            MonsterDataGrid.foundation.observer.listen(type, function (arg) {
+                handler(arg);
+            });
+            return this;
+        },
+        //自定义按钮点击绑定
+        btnBind:function(callback){
+            callback(this);
+            return this;
+        },
         //自动列渲染
-        autoColumnRender: function (obj) {
+        autoColumnRender: function (obj,data) {
             let render = this.proxy(MonsterDataGrid.foundation.customColumnRender);
             for (let i = 0; i < obj.length; i++) {
+                MonsterDataGrid.foundation.btnEvent[i] = MonsterDataGrid.foundation.btnEventName + i;
                 if (obj[i].editColumn) {
+                    render.edit.click(function(){
+                        obj[i].editColumn.url &&
+                        lay({
+                            title:MonsterDataGrid.foundation.customEditColumnString,
+                            content:obj[i].editColumn.url,
+                            area:["1024px","800px"]
+                        }).on(lay.foundation.btnEvent[0],function(that){
+                            MonsterDataGrid.foundation.observer.trigger(MonsterDataGrid.foundation.btnEvent[i],that.getFrame());
+                        });
+                    });
                     render.cell.append(render.edit);
                     continue;
                 }
                 if (obj[i].delColumn) {
+                    render.del.click(function(){
+                        MonsterDataGrid.foundation.observer.trigger(MonsterDataGrid.foundation.btnEvent[i])
+                    });
                     render.cell.append(render.del);
+                    continue;
+                }
+                if(obj[i].customColumn){
+                    if(typeof obj[i].customColumn ==="function"){
+                        let customBtn=$(obj[i].customColumn());
+                        customBtn.click(function(){
+                            MonsterDataGrid.foundation.observer.trigger(MonsterDataGrid.foundation.btnEvent[i],data)
+                        });
+                        render.cell.append(customBtn)
+                    }
                 }
             }
             return render.cell;
@@ -268,6 +349,7 @@
             $.ajax({
                 url: this.config.url,
                 type: this.config.type,
+                async:false,
                 data: data,
                 dataType: MonsterDataGrid.foundation.dataType
             }).then(function (data, result) {
@@ -394,7 +476,7 @@
                         if (j !== MonsterDataGrid.foundation.customField) {
                             tr.append(this.setColsWidth(this.fieldMapping[j], this.proxy(MonsterDataGrid.foundation.td, this.data[i][j])));
                         } else if (j === MonsterDataGrid.foundation.customField && this.monster.customColumn) {
-                            tr.append(this.setColsWidth(this.fieldMapping[j], this.proxy(MonsterDataGrid.foundation.td, this.autoColumnRender(this.monster.customColumn))));
+                            tr.append(this.setColsWidth(this.fieldMapping[j], this.proxy(MonsterDataGrid.foundation.td, this.autoColumnRender(this.monster.customColumn,this.data[i]))));
                         }
                         this.monster.dataGrid.boxTableBodyElement.append(tr);
                     }
@@ -456,4 +538,4 @@
     if (!w.MonsterDataGrid) {
         w.monsterDataGrid = MonsterDataGrid;
     }
-})(window, monsterPagination, monsterLoading);
+})(window, monsterPagination, monsterLoading,layering);
